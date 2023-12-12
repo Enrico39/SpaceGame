@@ -8,9 +8,23 @@
 import UIKit
 import SpriteKit
 import GameplayKit
+import AVFoundation
 
 class GameViewController: UIViewController {
-
+    
+    lazy var backgroundMusic: AVAudioPlayer? = {
+            guard let url =  Bundle.main.url(forResource: kBackgroundMusic, withExtension: kExtensionMusic) else {
+                return nil
+            }
+            do{
+                let player = try AVAudioPlayer(contentsOf: url)
+                player.numberOfLoops = -1
+                return player
+            }catch{
+                return nil
+            }
+        }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -28,7 +42,13 @@ class GameViewController: UIViewController {
             
             view.showsFPS = true
             view.showsNodeCount = true
+            
+            
         }
+        
+        playStopBackgroundMusic()
+              
+        SoundManager.shared.setSound(true)
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -42,4 +62,20 @@ class GameViewController: UIViewController {
     override var prefersStatusBarHidden: Bool {
         return true
     }
+    
+    func playStopBackgroundMusic() {
+            if SoundManager.shared.getSound(){
+                backgroundMusic?.play()
+            } else {
+                backgroundMusic?.stop()
+            }
+        }
+        
+        func run(_ fileName: String, onNode: SKNode){
+            if SoundManager.shared.getSound() {
+                onNode.run(SKAction.playSoundFileNamed(fileName, waitForCompletion: false))
+            }
+           
+        }
+    
 }
