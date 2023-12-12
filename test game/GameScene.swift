@@ -11,8 +11,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var groundNode: SKSpriteNode!
     var player: SKSpriteNode!
-    var background1: SKSpriteNode!
-    var background2: SKSpriteNode!
+
     let backgroundSpeed: CGFloat = 100.0
     var lastUpdateTime: TimeInterval = 0
     var deltaTime: TimeInterval = 0
@@ -27,25 +26,83 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var introAnimationFrames: [SKTexture] = []
     let tapToPlayLabel = SKLabelNode(fontNamed: "Chalkduster")
     var animationNode: SKSpriteNode!
-
+    var backgroundFrames: [SKTexture] = []
+        var scrollingBackground: SKSpriteNode!
+    var scrollingBackground1: SKSpriteNode!
+    var scrollingBackground2: SKSpriteNode!
+    
+    
+    
     override func didMove(to view: SKView) {
         self.physicsWorld.contactDelegate = self
         initializeIntroAnimation()
         playIntroAnimation()
         
         setupSwipeGesture(view: view)
-
-        
-        background1 = SKSpriteNode(imageNamed: "bg")
-        background1.position = CGPoint(x: size.width/2, y: size.height/5)
-        background1.zPosition = -1
-        addChild(background1)
-        
-        background2 = SKSpriteNode(imageNamed: "bg")
-        background2.position = CGPoint(x: background1.size.width + background1.position.x, y: size.height/5)
-        background2.zPosition = -1
-        addChild(background2)
+ 
+        createGround()
+        loadBackgroundTextures()
+        createScrollingBackgrounds()
     }
+    
+    func loadBackgroundTextures() {
+        for i in 1...306 {
+            backgroundFrames.append(SKTexture(imageNamed: "planets\(i)"))
+        }
+    }
+    func createScrollingBackgrounds() {
+          scrollingBackground1 = createBackgroundNode()
+          scrollingBackground2 = createBackgroundNode()
+          scrollingBackground2.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width, y: scrollingBackground1.position.y)
+
+          addChild(scrollingBackground1)
+          addChild(scrollingBackground2)
+      }
+    func createScrollingBackground() {
+        loadBackgroundTextures()
+        let backgroundAnimation = SKAction.animate(with: backgroundFrames, timePerFrame: 0.03)
+        let endlessAnimation = SKAction.repeatForever(backgroundAnimation)
+
+        // Crea il primo nodo di sfondo
+        let scrollingBackground1 = createBackgroundNode()
+        scrollingBackground1.run(endlessAnimation)
+        
+        // Crea il secondo nodo di sfondo
+        let scrollingBackground2 = createBackgroundNode()
+        scrollingBackground2.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width, y: scrollingBackground1.position.y)
+        scrollingBackground2.run(endlessAnimation)
+
+        let moveLeft = SKAction.moveBy(x: -scrollingBackground1.size.width * 2, y: 0, duration: 20)
+        let resetPosition = SKAction.run {
+            scrollingBackground1.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width * 2, y: scrollingBackground1.position.y)
+            scrollingBackground2.position = CGPoint(x: scrollingBackground2.position.x + scrollingBackground2.size.width * 2, y: scrollingBackground2.position.y)
+        }
+        let moveSequence = SKAction.sequence([moveLeft, resetPosition])
+        let moveForever = SKAction.repeatForever(moveSequence)
+
+        scrollingBackground1.run(moveForever)
+        scrollingBackground2.run(moveForever)
+
+        addChild(scrollingBackground1)
+        addChild(scrollingBackground2)
+    }
+
+    func createBackgroundNode() -> SKSpriteNode {
+        let backgroundNode = SKSpriteNode(texture: backgroundFrames.first)
+        let yPos = groundNode.position.y + groundNode.size.height / 2 + backgroundNode.size.height / 2
+        backgroundNode.position = CGPoint(x: frame.midX, y: yPos + 100)
+        backgroundNode.size = CGSize(width: 3000, height: 1000)
+        backgroundNode.zPosition = -1
+
+        // Aggiungi l'animazione dei pianeti
+        let backgroundAnimation = SKAction.animate(with: backgroundFrames, timePerFrame: 0.03)
+        let endlessAnimation = SKAction.repeatForever(backgroundAnimation)
+        backgroundNode.run(endlessAnimation)
+
+        return backgroundNode
+    }
+
+
     
     func initializeIntroAnimation() {
         for i in 1...61 {
@@ -54,7 +111,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func playIntroAnimation() {
-        let animation = SKAction.animate(with: introAnimationFrames, timePerFrame: 0.1)
+        let animation = SKAction.animate(with: introAnimationFrames, timePerFrame: 0.01)
           animationNode = SKSpriteNode(texture: introAnimationFrames.first)
         animationNode.position = CGPoint(x: frame.midX, y: frame.midY)
         animationNode.size=CGSize(width: frame.width, height: frame.height)
@@ -88,7 +145,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func startGame() {
-        createGround()
+        
         createPlayer()
         createLoveNode()
         spawnEnemiesPeriodically()
@@ -132,21 +189,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         lastUpdateTime = currentTime
         
-        let amountToMove = backgroundSpeed * CGFloat(deltaTime)
-        background1.position.x -= amountToMove
-        background2.position.x -= amountToMove
-        
-        if background1.position.x <= -background1.size.width {
-            background1.position.x = background2.position.x + background2.size.width
-        }
-        if background2.position.x <= -background2.size.width {
-            background2.position.x = background1.position.x + background1.size.width
-        }
-        
+ 
         if isPlayerJumping {
             if let velocity = player.physicsBody?.velocity.dy, velocity < 0 {
                 player.texture = SKTexture(imageNamed: "player-jump2")
             }
+        }
+        
+        updateBackgroundPosition(scrollingBackground1)
+            updateBackgroundPosition(scrollingBackground2)
+    }
+    
+    func updateBackgroundPosition(_ background: SKSpriteNode) {
+        // Sposta lo sfondo verso sinistra
+        background.position = CGPoint(x: background.position.x - 5, y: background.position.y)
+
+        // Se lo sfondo esce completamente dallo schermo, riposizionalo
+        if background.position.x <= -background.size.width {
+            background.position = CGPoint(x: background.size.width, y: background.position.y)
         }
     }
     
