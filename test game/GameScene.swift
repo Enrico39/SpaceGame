@@ -2,7 +2,7 @@
 //  GameScene.swift
 //  test game
 //
-//  Created by Enrico Madonna on 07/12/23.
+//  Created by Enrico Madonna(Beniamino Nardones wife) on 07/12/23.
 //
 import SpriteKit
 import GameplayKit
@@ -33,6 +33,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var canRestart:Bool = false
     var deathFrames: [SKTexture] = []
     
+    
+    //death's animation
     func loadDeathTextures() {
         for i in 1...2 {
             deathFrames.append(SKTexture(imageNamed: "death\(i)"))
@@ -52,11 +54,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createScrollingBackgrounds()
     }
     
+    //animation background
     func loadBackgroundTextures() {
         for i in 1...306 {
             backgroundFrames.append(SKTexture(imageNamed: "planets\(i)"))
         }
     }
+    
     func createScrollingBackgrounds() {
         scrollingBackground1 = createBackgroundNode()
         scrollingBackground2 = createBackgroundNode()
@@ -65,6 +69,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(scrollingBackground1)
         addChild(scrollingBackground2)
     }
+    
     func createScrollingBackground() {
         loadBackgroundTextures()
         let backgroundAnimation = SKAction.animate(with: backgroundFrames, timePerFrame: 0.03)
@@ -110,7 +115,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     
-    
+    //animation intro
     func initializeIntroAnimation() {
         for i in 1...61 {
             introAnimationFrames.append(SKTexture(imageNamed: "intro\(i)"))
