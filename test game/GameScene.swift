@@ -11,13 +11,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var groundNode: SKSpriteNode!
     var player: SKSpriteNode!
-    
     let backgroundSpeed: CGFloat = 100.0
     var lastUpdateTime: TimeInterval = 0
     var deltaTime: TimeInterval = 0
     var isPlayerJumping = false
     let runningActionKey = "runningAction"
     var runningFrames: [SKTexture] = []
+    var shootFrames: [SKTexture] = []
+
     let gameOverLabel = SKLabelNode(fontNamed: "Chalkduster")
     let restartLabel = SKLabelNode(fontNamed: "Chalkduster")
     var isGameOver = false
@@ -27,155 +28,61 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let tapToPlayLabel = SKLabelNode(fontNamed: "Chalkduster")
     var animationNode: SKSpriteNode!
     var backgroundFrames: [SKTexture] = []
+    var backgroundFrames2: [SKTexture] = []
+
     var scrollingBackground: SKSpriteNode!
     var scrollingBackground1: SKSpriteNode!
     var scrollingBackground2: SKSpriteNode!
     var canRestart:Bool = false
     var deathFrames: [SKTexture] = []
     
-    
-    //death's animation
-    func loadDeathTextures() {
-        for i in 1...2 {
-            deathFrames.append(SKTexture(imageNamed: "death\(i)"))
-        }
-    }
-    
-    
+    var moonGround1: SKSpriteNode!
+    var moonGround2: SKSpriteNode!
+    var moonGroundSpeed: CGFloat = 5.0
+
     override func didMove(to view: SKView) {
-        self.physicsWorld.contactDelegate = self
-        initializeIntroAnimation()
-        playIntroAnimation()
-        
-        setupSwipeGesture(view: view)
-        
-        createGround()
-        loadBackgroundTextures()
-        createScrollingBackgrounds()
-    }
-    
-    //animation background
-    func loadBackgroundTextures() {
-        for i in 1...306 {
-            backgroundFrames.append(SKTexture(imageNamed: "planets\(i)"))
-        }
-    }
-    
-    func createScrollingBackgrounds() {
-        scrollingBackground1 = createBackgroundNode()
-        scrollingBackground2 = createBackgroundNode()
-        scrollingBackground2.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width, y: scrollingBackground1.position.y)
-        
-        addChild(scrollingBackground1)
-        addChild(scrollingBackground2)
-    }
-    
-    func createScrollingBackground() {
-        loadBackgroundTextures()
-        let backgroundAnimation = SKAction.animate(with: backgroundFrames, timePerFrame: 0.03)
-        let endlessAnimation = SKAction.repeatForever(backgroundAnimation)
-        
-        // Crea il primo nodo di sfondo
-        let scrollingBackground1 = createBackgroundNode()
-        scrollingBackground1.run(endlessAnimation)
-        
-        // Crea il secondo nodo di sfondo
-        let scrollingBackground2 = createBackgroundNode()
-        scrollingBackground2.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width, y: scrollingBackground1.position.y)
-        scrollingBackground2.run(endlessAnimation)
-        
-        let moveLeft = SKAction.moveBy(x: -scrollingBackground1.size.width * 2, y: 0, duration: 20)
-        let resetPosition = SKAction.run {
-            scrollingBackground1.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width * 2, y: scrollingBackground1.position.y)
-            scrollingBackground2.position = CGPoint(x: scrollingBackground2.position.x + scrollingBackground2.size.width * 2, y: scrollingBackground2.position.y)
-        }
-        let moveSequence = SKAction.sequence([moveLeft, resetPosition])
-        let moveForever = SKAction.repeatForever(moveSequence)
-        
-        scrollingBackground1.run(moveForever)
-        scrollingBackground2.run(moveForever)
-        
-        addChild(scrollingBackground1)
-        addChild(scrollingBackground2)
-    }
-    
-    func createBackgroundNode() -> SKSpriteNode {
-        let backgroundNode = SKSpriteNode(texture: backgroundFrames.first)
-        let yPos = groundNode.position.y + groundNode.size.height / 2 + backgroundNode.size.height / 2
-        backgroundNode.position = CGPoint(x: frame.midX, y: yPos + 100)
-        backgroundNode.size = CGSize(width: 3000, height: 1000)
-        backgroundNode.zPosition = -1
-        
-        // Aggiungi l'animazione dei pianeti
-        let backgroundAnimation = SKAction.animate(with: backgroundFrames, timePerFrame: 0.03)
-        let endlessAnimation = SKAction.repeatForever(backgroundAnimation)
-        backgroundNode.run(endlessAnimation)
-        
-        return backgroundNode
-    }
-    
-    
-    //animation intro
-    func initializeIntroAnimation() {
-        for i in 1...61 {
-            introAnimationFrames.append(SKTexture(imageNamed: "intro\(i)"))
-        }
-    }
-    
-    func playIntroAnimation() {
-        let animation = SKAction.animate(with: introAnimationFrames, timePerFrame: 0.07)
-        animationNode = SKSpriteNode(texture: introAnimationFrames.first)
-        animationNode.position = CGPoint(x: frame.midX, y: frame.midY)
-        animationNode.size=CGSize(width: frame.width, height: frame.height)
-        animationNode.zPosition = 2
-        addChild(animationNode)
-        
-        animationNode.run(animation) { [weak self] in
-            self?.showTapToPlay()
-        }
-    }
-    
-    func showTapToPlay() {
-        tapToPlayLabel.text = "Tap to Play"
-        tapToPlayLabel.fontSize = 40
-        tapToPlayLabel.position = CGPoint(x: frame.midX, y: frame.midY)
-        addChild(tapToPlayLabel)
-    }
-    
+         // Imposta il delegate per la gestione dei contatti fisici
+         self.physicsWorld.contactDelegate = self
+         
+         // Inizializza e avvia l'animazione introduttiva
+         initializeIntroAnimation()
+         playIntroAnimation()
+         
+         // Configura la gesture di swipe
+         setupSwipeGesture(view: view)
+         
+         // Crea il terreno di gioco
+         createGround()
+         
+         // Carica le texture degli sfondi
+         loadBackgroundTextures()
+         loadBackgroundTextures2()
+         
+         // Carica le texture per l'animazione di "shoot"
+         loadShootTextures()
+         
+         // Crea gli sfondi scorrevoli
+         createScrollingBackgrounds()
+         
+         // Crea i terreni lunari
+         createMoonGrounds()
+     }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // Gestione dei tocchi
         if isGameOver {
             restartGame()
         } else {
             if tapToPlayLabel.parent != nil {
+                // Rimuovi le etichette di inizio gioco
                 tapToPlayLabel.removeFromParent()
                 animationNode.removeFromParent()
                 startGame()
             } else {
-                // Handle other touch events, like jumping
+                // Esegui l'animazione di "shoot"
+               // shootPlayer()
             }
         }
-        
-        
-        
-        
-    }
-    
-    func startGame() {
-        
-        createPlayer()
-        createLoveNode()
-        spawnEnemiesPeriodically()
-    }
-    
-    func createGround() {
-        let groundTexture = SKTexture(imageNamed: "ground")
-        groundNode = SKSpriteNode(texture: groundTexture)
-        groundNode.position = CGPoint(x: frame.midX, y: -517)
-        addChild(groundNode)
-        groundNode.size=CGSize(width: 1300, height: 500)
-        groundNode.physicsBody = SKPhysicsBody(rectangleOf: groundNode.size)
-        groundNode.physicsBody?.isDynamic = false
-        groundNode.physicsBody?.categoryBitMask = 1
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
@@ -219,85 +126,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     player.texture = SKTexture(imageNamed: "player-jump2")
                 }
             }
-            
-            updateBackgroundPosition(scrollingBackground1)
-            updateBackgroundPosition(scrollingBackground2)
-        }
-    }
-    
-    func updateBackgroundPosition(_ background: SKSpriteNode) {
-        // Sposta lo sfondo verso sinistra
-        background.position = CGPoint(x: background.position.x - 5, y: background.position.y)
-        
-        // Se lo sfondo esce completamente dallo schermo, riposizionalo
-        if background.position.x <= -background.size.width {
-            background.position = CGPoint(x: background.size.width, y: background.position.y)
-        }
-    }
-    
-    func createLoveNode() {
-        let loveNode = SKSpriteNode(imageNamed: "love")
-        loveNode.position = CGPoint(x: 0, y: 500)
-        loveNode.size = CGSize(width: 400, height: 150)
-        loveNode.zPosition = 1
-        addChild(loveNode)
-    }
-    
-    func gameOver() {
-        isGameOver = true
-        playDeathAnimation()
-        
-        
-        gameOverLabel.removeFromParent()
-
-        gameOverLabel.text = "Game Over"
-        gameOverLabel.fontSize = 40
-        gameOverLabel.position = CGPoint(x: frame.midX, y: frame.midY)
-        addChild(gameOverLabel)
-        self.removeAllActions()
-        for enemy in enemies {
-            enemy.removeAllActions()
-            enemy.removeFromParent()
+            updateBackgrounds()
+           // updateBackgroundPosition(scrollingBackground1)
+          //  updateBackgroundPosition(scrollingBackground2)
+            updateBackgroundPosition(moonGround1)
+                updateBackgroundPosition(moonGround2)
         }
     }
     
     
-    func showGameOverScreen() {
-        
-        restartLabel.removeFromParent()
-        restartLabel.text = "Tap to Restart"
-        restartLabel.fontSize = 30
-        restartLabel.position = CGPoint(x: frame.midX, y: frame.midY - 50)
-        restartLabel.fontColor = UIColor.black  // Cambia il colore in rosso
-
-        addChild(restartLabel)
-
-        // Crea l'azione di lampeggiamento
-        let fadeOut = SKAction.fadeOut(withDuration: 0.8)
-        let fadeIn = SKAction.fadeIn(withDuration: 0.8)
-        let blinkSequence = SKAction.sequence([fadeOut, fadeIn])
-        let repeatBlink = SKAction.repeatForever(blinkSequence)
-
-        // Applica l'azione al nodo restartLabel
-        restartLabel.run(repeatBlink)
-    }
-    
-    
-    
-    
-    
-    func restartGame() {
-        if canRestart{
-            isGameOver = false
-            
-            restartLabel.removeFromParent()
-            gameOverLabel.removeFromParent()
-            spawnEnemiesPeriodically()
-            createPlayer()
-            canRestart = false
-        }
-        // Restart any necessary game actions or animations
-    }
+  
 }
 
 // MARK: ENEMIES
@@ -313,8 +151,8 @@ extension GameScene {
     
     func createEnemy() {
         let enemy = SKSpriteNode(imageNamed: "alien1")
-        enemy.position = CGPoint(x: 300, y: 217)
-        enemy.size = CGSize(width: 60, height: 60)
+        enemy.position = CGPoint(x: 300, y: -217)
+         enemy.size = CGSize(width: 60, height: 60)
         enemy.xScale = -1
         
         var walkFrames: [SKTexture] = []
@@ -332,7 +170,7 @@ extension GameScene {
         enemy.physicsBody?.collisionBitMask = groundNode.physicsBody!.categoryBitMask
         enemy.zPosition = 1
         
-        let moveAction = SKAction.moveTo(x: -300, duration: 3.0)
+        let moveAction = SKAction.moveTo(x: -500, duration: 3.0)
         let removeAction = SKAction.removeFromParent()
         enemy.run(SKAction.sequence([moveAction, removeAction]))
         
@@ -343,13 +181,20 @@ extension GameScene {
 
 // MARK: PLAYER
 extension GameScene{
-    
+    func createLoveNode() {
+        let loveNode = SKSpriteNode(imageNamed: "lovemeter8")
+        loveNode.position = CGPoint(x: 0, y: 500)
+        loveNode.size = CGSize(width: 700, height: 350)
+        loveNode.zPosition = 1
+        addChild(loveNode)
+    }
+
     func createPlayer() {
         // Load the first frame to initialize the player
         let initialFrame = SKTexture(imageNamed: "player")
         player = SKSpriteNode(texture: initialFrame)
         player.position = CGPoint(x: -170, y: -217)
-        player.size = CGSize(width: 100, height: 100)
+        player.size = CGSize(width: 100, height: 110)
         
         // Set up physics for the player
         player.physicsBody = SKPhysicsBody(texture: player.texture!, size: player.size)
@@ -385,12 +230,44 @@ extension GameScene{
     func jumpPlayer() {
         if !isPlayerJumping {
             isPlayerJumping = true
-            player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 120))
+            player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 350))
             player.removeAction(forKey: runningActionKey)  // Stop running animation
             player.texture = SKTexture(imageNamed: "player-jump1")
         }
     }
+    //death's animation
+    func loadDeathTextures() {
+        for i in 1...2 {
+            deathFrames.append(SKTexture(imageNamed: "death\(i)"))
+        }
+    }
     
+    //shoot's animation
+    func loadShootTextures() {
+        for i in 1...6 {
+            shootFrames.append(SKTexture(imageNamed: "player-run-shoott\(i)"))
+        }
+    }
+    
+    func shootPlayer() {
+        if !isPlayerJumping {
+            // Rimuovi l'animazione di corsa e cambia la texture del player
+            player.removeAction(forKey: runningActionKey)
+            player.texture = SKTexture(imageNamed: "player-run-shoott1")
+            
+            // Crea l'animazione di "shoot"
+            let shootAction = SKAction.animate(with: shootFrames, timePerFrame: 0.1)
+            
+            // Usa la completion handler per tornare all'animazione di corsa dopo l'animazione di "shoot"
+            player.run(shootAction) { [weak self] in
+                self?.player.texture = SKTexture(imageNamed: "player") // Torna alla texture normale
+                let runningAction = SKAction.animate(with: self?.runningFrames ?? [], timePerFrame: 0.1)
+                self?.player.run(SKAction.repeatForever(runningAction), withKey: self?.runningActionKey ?? "") // Riprendi l'animazione di corsa
+            }
+        }
+    }
+
+
     func playDeathAnimation() {
 
         player.removeAllActions() // Rimuove tutte le azioni in corso, inclusa l'animazione di corsa
@@ -423,4 +300,210 @@ extension GameScene{
         
     }
     
+}
+
+//MARK: GROUND
+extension GameScene{
+    // Ottimizzazione della creazione del terreno di gioco
+      func createGround() {
+          groundNode = SKSpriteNode(imageNamed: "ground1")
+          groundNode.position = CGPoint(x: frame.midX, y: -517)
+          groundNode.size = CGSize(width: 1300, height: 500)
+          groundNode.physicsBody = SKPhysicsBody(rectangleOf: groundNode.size)
+          groundNode.physicsBody?.isDynamic = false
+          groundNode.physicsBody?.categoryBitMask = 1
+          addChild(groundNode)
+      }
+    
+    func createMoonGroundNode(imageName:String) -> SKSpriteNode {
+        let moonGroundNode = SKSpriteNode(imageNamed: imageName)  // Usa "moon1" o "moon2" a seconda dell'asset desiderato
+        moonGroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y+55)
+        moonGroundNode.size = CGSize(width: 1900, height:400)  // Modifica la dimensione in base alle tue esigenze
+        moonGroundNode.zPosition = 1
+        return moonGroundNode
+    }
+    
+    func createMoonGrounds() {
+        moonGround1 = createMoonGroundNode(imageName: "moon1")
+        moonGround2 = createMoonGroundNode(imageName: "moon2")
+         moonGround2.position = CGPoint(x: moonGround1.position.x + moonGround1.size.width, y: moonGround1.position.y)
+
+         addChild(moonGround1)
+         addChild(moonGround2)
+     }
+
+}
+
+ // MARK: BACKGROUND
+extension GameScene {
+    
+    func updateBackgroundPosition(_ background: SKSpriteNode) {
+        background.position = CGPoint(x: background.position.x - moonGroundSpeed, y: background.position.y)
+        
+        if background.position.x <= -background.size.width {
+            background.position = CGPoint(x: background.size.width, y: background.position.y)
+        }
+    }
+    
+    // Carica le texture degli sfondi
+    func loadBackgroundTextures() {
+        for i in 1...150 {
+            backgroundFrames.append(SKTexture(imageNamed: "planets\(i)"))
+        }
+    }
+    
+    func loadBackgroundTextures2() {
+        for i in 2...150 {
+            backgroundFrames2.append(SKTexture(imageNamed: "bg\(i)"))
+        }
+    }
+    
+    func createScrollingBackgrounds() {
+        scrollingBackground1 = createBackgroundNode(texture: backgroundFrames, yOffset: 100)
+        scrollingBackground2 = createBackgroundNode(texture: backgroundFrames2, yOffset: 100)
+        scrollingBackground2.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width, y: scrollingBackground1.position.y)
+        
+        addChild(scrollingBackground1)
+        addChild(scrollingBackground2)
+    }
+    
+    // Funzione di creazione ottimizzata per gli sfondi di gioco
+    func createBackgroundNode(texture: [SKTexture], yOffset: CGFloat) -> SKSpriteNode {
+        let backgroundNode = SKSpriteNode(texture: texture.first)
+        backgroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y + groundNode.size.height / 2 + backgroundNode.size.height / 2 + yOffset)
+        backgroundNode.size = CGSize(width: 3000, height: 1000)
+        backgroundNode.zPosition = -1
+        
+        let backgroundAnimation = SKAction.animate(with: texture, timePerFrame: 0.03)
+        let endlessAnimation = SKAction.repeatForever(backgroundAnimation)
+        backgroundNode.run(endlessAnimation)
+        
+        return backgroundNode
+    }
+    
+    // Chiamare questa funzione nell'override della funzione update per aggiornare la posizione degli sfondi
+    func updateBackgrounds() {
+        if !isGameOver {
+            updateBackgroundPosition(scrollingBackground1)
+            updateBackgroundPosition(scrollingBackground2)
+            
+            // Rimuovi gli sfondi scorrevoli fuori dallo schermo
+            if scrollingBackground1.position.x < -scrollingBackground1.size.width {
+                scrollingBackground1.removeFromParent()
+                scrollingBackground1 = createBackgroundNode(texture: backgroundFrames, yOffset: 100)
+                addChild(scrollingBackground1)
+            }
+            if scrollingBackground2.position.x < -scrollingBackground2.size.width {
+                scrollingBackground2.removeFromParent()
+                scrollingBackground2 = createBackgroundNode(texture: backgroundFrames2, yOffset: 100)
+                scrollingBackground2.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width, y: scrollingBackground1.position.y)
+                addChild(scrollingBackground2)
+            }
+        }
+    }
+}
+
+
+//MARK: INTROSCENE
+extension GameScene{
+    // Funzione di gioco ottimizzata
+    func startGame() {
+        // Crea il giocatore e altri elementi di gioco
+        createPlayer()
+        createLoveNode()
+        spawnEnemiesPeriodically()
+    }
+    //animation intro
+    func initializeIntroAnimation() {
+        for i in 1...61 {
+            introAnimationFrames.append(SKTexture(imageNamed: "intro\(i)"))
+        }
+    }
+    
+    func playIntroAnimation() {
+        let animation = SKAction.animate(with: introAnimationFrames, timePerFrame: 0.007)
+        animationNode = SKSpriteNode(texture: introAnimationFrames.first)
+        animationNode.position = CGPoint(x: frame.midX, y: frame.midY)
+        animationNode.size=CGSize(width: frame.width, height: frame.height)
+        animationNode.zPosition = 2
+        addChild(animationNode)
+        
+        animationNode.run(animation) { [weak self] in
+            self?.showTapToPlay()
+        }
+    }
+    
+    func showTapToPlay() {
+        tapToPlayLabel.text = "Tap to Play"
+        tapToPlayLabel.fontSize = 40
+        tapToPlayLabel.position = CGPoint(x: frame.midX, y: frame.midY)
+        addChild(tapToPlayLabel)
+    }
+}
+
+//MARK: GAMEOVER
+extension GameScene{
+    // Funzione di gioco ottimizzata
+    func gameOver() {
+        isGameOver = true
+        playDeathAnimation()
+        
+        // Rimuovi le etichette di game over
+        gameOverLabel.removeFromParent()
+        
+        // Mostra "Game Over" e "Tap to Restart"
+        gameOverLabel.text = "Game Over"
+        gameOverLabel.fontSize = 40
+        gameOverLabel.position = CGPoint(x: frame.midX, y: frame.midY)
+        addChild(gameOverLabel)
+        
+        // Rimuovi tutte le azioni e gli sprite nemici
+        self.removeAllActions()
+        for enemy in enemies {
+            enemy.removeAllActions()
+            enemy.removeFromParent()
+        }
+    }
+    
+    // Funzione di gioco ottimizzata
+      func showGameOverScreen() {
+          // Rimuovi etichetta di restart esistente, se presente
+          restartLabel.removeFromParent()
+          
+          // Configura l'etichetta di "Tap to Restart"
+          restartLabel.text = "Tap to Restart"
+          restartLabel.fontSize = 30
+          restartLabel.position = CGPoint(x: frame.midX, y: frame.midY - 50)
+          restartLabel.fontColor = UIColor.black
+          
+          // Aggiungi l'etichetta con effetto di lampeggiamento
+          addChild(restartLabel)
+          let fadeOut = SKAction.fadeOut(withDuration: 0.8)
+          let fadeIn = SKAction.fadeIn(withDuration: 0.8)
+          let blinkSequence = SKAction.sequence([fadeOut, fadeIn])
+          let repeatBlink = SKAction.repeatForever(blinkSequence)
+          restartLabel.run(repeatBlink)
+      }
+    
+    
+    
+    
+    
+    // Funzione di gioco ottimizzata
+    func restartGame() {
+        // Controlla se è possibile riavviare il gioco
+        if canRestart {
+            isGameOver = false
+            
+            // Rimuovi etichette e sprite di game over
+            restartLabel.removeFromParent()
+            gameOverLabel.removeFromParent()
+            
+            // Ripristina gli elementi di gioco
+            spawnEnemiesPeriodically()
+            createPlayer()
+            
+            canRestart = false
+        }
+    }
 }
