@@ -182,9 +182,9 @@ extension GameScene {
 // MARK: PLAYER
 extension GameScene{
     func createLoveNode() {
-        let loveNode = SKSpriteNode(imageNamed: "lovemeter8")
-        loveNode.position = CGPoint(x: 0, y: 500)
-        loveNode.size = CGSize(width: 700, height: 350)
+        let loveNode = SKSpriteNode(imageNamed: "life-export9")
+        loveNode.position = CGPoint(x: 30, y: 500)
+       // loveNode.size = CGSize(width: 500, height: 300)
         loveNode.zPosition = 1
         addChild(loveNode)
     }
@@ -317,9 +317,9 @@ extension GameScene{
     
     func createMoonGroundNode(imageName:String) -> SKSpriteNode {
         let moonGroundNode = SKSpriteNode(imageNamed: imageName)  // Usa "moon1" o "moon2" a seconda dell'asset desiderato
-        moonGroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y+55)
+        moonGroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y+65)
         moonGroundNode.size = CGSize(width: 1900, height:400)  // Modifica la dimensione in base alle tue esigenze
-        moonGroundNode.zPosition = 1
+        moonGroundNode.zPosition = 5
         return moonGroundNode
     }
     
@@ -425,7 +425,7 @@ extension GameScene{
         animationNode = SKSpriteNode(texture: introAnimationFrames.first)
         animationNode.position = CGPoint(x: frame.midX, y: frame.midY)
         animationNode.size=CGSize(width: frame.width, height: frame.height)
-        animationNode.zPosition = 2
+        animationNode.zPosition = 20
         addChild(animationNode)
         
         animationNode.run(animation) { [weak self] in
