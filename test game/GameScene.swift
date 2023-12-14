@@ -8,11 +8,10 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    
+ 
     var groundNode: SKSpriteNode!
     var player: SKSpriteNode!
-    let backgroundSpeed: CGFloat = 100.0
-    var lastUpdateTime: TimeInterval = 0
+     var lastUpdateTime: TimeInterval = 0
     var deltaTime: TimeInterval = 0
     var isPlayerJumping = false
     let runningActionKey = "runningAction"
@@ -27,15 +26,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var introAnimationFrames: [SKTexture] = []
     let tapToPlayLabel = SKLabelNode(fontNamed: "Chalkduster")
     var animationNode: SKSpriteNode!
-    var backgroundFrames: [SKTexture] = []
-    var backgroundFrames2: [SKTexture] = []
+    
 
-    var scrollingBackground: SKSpriteNode!
-    var scrollingBackground1: SKSpriteNode!
-    var scrollingBackground2: SKSpriteNode!
+ 
     var canRestart:Bool = false
     var deathFrames: [SKTexture] = []
-    
+  
     var moonGround1: SKSpriteNode!
     var moonGround2: SKSpriteNode!
     var moonGroundSpeed: CGFloat = 5.0
@@ -54,18 +50,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
          // Crea il terreno di gioco
          createGround()
          
-         // Carica le texture degli sfondi
-         loadBackgroundTextures()
-         loadBackgroundTextures2()
+    
          
          // Carica le texture per l'animazione di "shoot"
          loadShootTextures()
          
-         // Crea gli sfondi scorrevoli
-         createScrollingBackgrounds()
-         
+ 
          // Crea i terreni lunari
          createMoonGrounds()
+        
+        createScrollingBackground()
+         
      }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -126,17 +121,107 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     player.texture = SKTexture(imageNamed: "player-jump2")
                 }
             }
-            updateBackgrounds()
-           // updateBackgroundPosition(scrollingBackground1)
-          //  updateBackgroundPosition(scrollingBackground2)
-            updateBackgroundPosition(moonGround1)
-                updateBackgroundPosition(moonGround2)
-        }
+          
+            updateGroundPosition(moonGround1)
+                updateGroundPosition(moonGround2)
+         }
     }
     
     
   
 }
+
+
+//MARK: GROUND
+extension GameScene{
+    // Ottimizzazione della creazione del terreno di gioco
+      func createGround() {
+          groundNode = SKSpriteNode(imageNamed: "ground1")
+          groundNode.position = CGPoint(x: frame.midX, y: -517)
+          groundNode.size = CGSize(width: 1300, height: 500)
+          groundNode.physicsBody = SKPhysicsBody(rectangleOf: groundNode.size)
+          groundNode.physicsBody?.isDynamic = false
+          groundNode.physicsBody?.categoryBitMask = 1
+          addChild(groundNode)
+      }
+    
+    func createMoonGroundNode(imageName:String) -> SKSpriteNode {
+        let moonGroundNode = SKSpriteNode(imageNamed: imageName)  // Usa "moon1" o "moon2" a seconda dell'asset desiderato
+        moonGroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y+55)
+        moonGroundNode.size = CGSize(width: 1900, height:400)  // Modifica la dimensione in base alle tue esigenze
+        moonGroundNode.zPosition = 1
+        return moonGroundNode
+    }
+    
+    func createMoonGrounds() {
+        moonGround1 = createMoonGroundNode(imageName: "moon1")
+        moonGround2 = createMoonGroundNode(imageName: "moon2")
+         moonGround2.position = CGPoint(x: moonGround1.position.x + moonGround1.size.width, y: moonGround1.position.y)
+
+         addChild(moonGround1)
+         addChild(moonGround2)
+     }
+    func updateGroundPosition(_ background: SKSpriteNode) {
+        background.position = CGPoint(x: background.position.x - moonGroundSpeed, y: background.position.y)
+        
+        if background.position.x <= -background.size.width {
+            background.position = CGPoint(x: background.size.width, y: background.position.y)
+        }
+    }
+
+}
+
+// MARK: Background
+extension GameScene {
+    func createBackgroundNode(imageName: String) -> SKSpriteNode {
+        let backgroundNode = SKSpriteNode(imageNamed: imageName)
+        backgroundNode.position = CGPoint(x: frame.midX, y: frame.midY)
+        backgroundNode.size = CGSize(width: self.size.width, height: 800)
+        backgroundNode.zPosition = -1
+        return backgroundNode
+    }
+
+    func createScrollingBackground() {
+        // Creazione dei nodi di sfondo
+        let background1 = createBackgroundNode(imageName: "planets1")
+        let background2 = createBackgroundNode(imageName: "bg2")
+
+        // Posizionamento iniziale del secondo sfondo
+        background2.position = CGPoint(x: background1.position.x + background1.size.width, y: background1.position.y)
+
+        // Aggiunta dei nodi di sfondo alla scena
+        addChild(background1)
+        addChild(background2)
+
+        // Array dei nodi di sfondo per un facile accesso
+        let backgrounds = [background1, background2]
+
+        // Funzione per aggiornare la posizione di ogni sfondo
+        func updateBackgroundPosition() {
+            for background in backgrounds {
+                // Aggiorna la posizione di ogni sfondo
+                background.position = CGPoint(x: background.position.x - moonGroundSpeed, y: background.position.y)
+                
+                // Quando un sfondo esce completamente dallo schermo, riposizionalo
+                if background.position.x <= -background.size.width {
+                    background.position = CGPoint(x: background.position.x + background.size.width * 2, y: background.position.y)
+                }
+            }
+        }
+
+        // Aggiungi l'aggiornamento della posizione allo SKAction
+        let updateAction = SKAction.run(updateBackgroundPosition)
+        let delayAction = SKAction.wait(forDuration: 0.03) // Regola il ritardo per controllare la velocità di scorrimento
+        let updateLoopAction = SKAction.repeatForever(SKAction.sequence([updateAction, delayAction]))
+
+        run(updateLoopAction)
+    }
+
+    // Altri metodi e proprietà della classe GameScene...
+}
+
+
+
 
 // MARK: ENEMIES
 extension GameScene {
@@ -300,107 +385,6 @@ extension GameScene{
         
     }
     
-}
-
-//MARK: GROUND
-extension GameScene{
-    // Ottimizzazione della creazione del terreno di gioco
-      func createGround() {
-          groundNode = SKSpriteNode(imageNamed: "ground1")
-          groundNode.position = CGPoint(x: frame.midX, y: -517)
-          groundNode.size = CGSize(width: 1300, height: 500)
-          groundNode.physicsBody = SKPhysicsBody(rectangleOf: groundNode.size)
-          groundNode.physicsBody?.isDynamic = false
-          groundNode.physicsBody?.categoryBitMask = 1
-          addChild(groundNode)
-      }
-    
-    func createMoonGroundNode(imageName:String) -> SKSpriteNode {
-        let moonGroundNode = SKSpriteNode(imageNamed: imageName)  // Usa "moon1" o "moon2" a seconda dell'asset desiderato
-        moonGroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y+55)
-        moonGroundNode.size = CGSize(width: 1900, height:400)  // Modifica la dimensione in base alle tue esigenze
-        moonGroundNode.zPosition = 1
-        return moonGroundNode
-    }
-    
-    func createMoonGrounds() {
-        moonGround1 = createMoonGroundNode(imageName: "moon1")
-        moonGround2 = createMoonGroundNode(imageName: "moon2")
-         moonGround2.position = CGPoint(x: moonGround1.position.x + moonGround1.size.width, y: moonGround1.position.y)
-
-         addChild(moonGround1)
-         addChild(moonGround2)
-     }
-
-}
-
- // MARK: BACKGROUND
-extension GameScene {
-    
-    func updateBackgroundPosition(_ background: SKSpriteNode) {
-        background.position = CGPoint(x: background.position.x - moonGroundSpeed, y: background.position.y)
-        
-        if background.position.x <= -background.size.width {
-            background.position = CGPoint(x: background.size.width, y: background.position.y)
-        }
-    }
-    
-    // Carica le texture degli sfondi
-    func loadBackgroundTextures() {
-        for i in 1...150 {
-            backgroundFrames.append(SKTexture(imageNamed: "planets\(i)"))
-        }
-    }
-    
-    func loadBackgroundTextures2() {
-        for i in 2...150 {
-            backgroundFrames2.append(SKTexture(imageNamed: "bg\(i)"))
-        }
-    }
-    
-    func createScrollingBackgrounds() {
-        scrollingBackground1 = createBackgroundNode(texture: backgroundFrames, yOffset: 100)
-        scrollingBackground2 = createBackgroundNode(texture: backgroundFrames2, yOffset: 100)
-        scrollingBackground2.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width, y: scrollingBackground1.position.y)
-        
-        addChild(scrollingBackground1)
-        addChild(scrollingBackground2)
-    }
-    
-    // Funzione di creazione ottimizzata per gli sfondi di gioco
-    func createBackgroundNode(texture: [SKTexture], yOffset: CGFloat) -> SKSpriteNode {
-        let backgroundNode = SKSpriteNode(texture: texture.first)
-        backgroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y + groundNode.size.height / 2 + backgroundNode.size.height / 2 + yOffset)
-        backgroundNode.size = CGSize(width: 3000, height: 1000)
-        backgroundNode.zPosition = -1
-        
-        let backgroundAnimation = SKAction.animate(with: texture, timePerFrame: 0.03)
-        let endlessAnimation = SKAction.repeatForever(backgroundAnimation)
-        backgroundNode.run(endlessAnimation)
-        
-        return backgroundNode
-    }
-    
-    // Chiamare questa funzione nell'override della funzione update per aggiornare la posizione degli sfondi
-    func updateBackgrounds() {
-        if !isGameOver {
-            updateBackgroundPosition(scrollingBackground1)
-            updateBackgroundPosition(scrollingBackground2)
-            
-            // Rimuovi gli sfondi scorrevoli fuori dallo schermo
-            if scrollingBackground1.position.x < -scrollingBackground1.size.width {
-                scrollingBackground1.removeFromParent()
-                scrollingBackground1 = createBackgroundNode(texture: backgroundFrames, yOffset: 100)
-                addChild(scrollingBackground1)
-            }
-            if scrollingBackground2.position.x < -scrollingBackground2.size.width {
-                scrollingBackground2.removeFromParent()
-                scrollingBackground2 = createBackgroundNode(texture: backgroundFrames2, yOffset: 100)
-                scrollingBackground2.position = CGPoint(x: scrollingBackground1.position.x + scrollingBackground1.size.width, y: scrollingBackground1.position.y)
-                addChild(scrollingBackground2)
-            }
-        }
-    }
 }
 
 
