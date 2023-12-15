@@ -25,6 +25,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var isGameOver = false
     var canShot = false
 
+    
+    
+    
     let enemyCategory: UInt32 = 4
     var enemies: [SKSpriteNode] = []
     var introAnimationFrames: [SKTexture] = []
@@ -32,6 +35,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var animationNode: SKSpriteNode!
     var backgroundFrames: [SKTexture] = []
     var backgroundFrames2: [SKTexture] = []
+    let obstacleCategory: UInt32 = 16
 
     var scrollingBackground: SKSpriteNode!
     var scrollingBackground1: SKSpriteNode!
@@ -42,6 +46,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var moonGround1: SKSpriteNode!
     var moonGround2: SKSpriteNode!
     var moonGroundSpeed: CGFloat = 5.0
+    var obstacle: SKSpriteNode!
 
     override func didMove(to view: SKView) {
          // Imposta il delegate per la gestione dei contatti fisici
@@ -122,6 +127,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             gameOver()
         }
         
+        if (contact.bodyA.categoryBitMask == player.physicsBody?.categoryBitMask && contact.bodyB.categoryBitMask == obstacleCategory) ||
+            (contact.bodyA.categoryBitMask == obstacleCategory && contact.bodyB.categoryBitMask == player.physicsBody?.categoryBitMask) {
+            gameOver()
+        }
+        
         if !isGameOver && !isPlayerJumping {
             if player.action(forKey: runningActionKey) == nil {
                 let runningAction = SKAction.animate(with: runningFrames, timePerFrame: 0.1)
@@ -166,6 +176,46 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
 }
 
+// MARK: OBSTACLES
+extension GameScene {
+    func spawnObstaclesPeriodically() {
+        let spawn = SKAction.run { [weak self] in
+            self?.createObstacle()
+        }
+        let delay = SKAction.wait(forDuration: 3.0, withRange: 1.0)
+        let spawnSequence = SKAction.sequence([spawn, delay])
+        run(SKAction.repeatForever(spawnSequence))
+    }
+    
+    func createObstacle() {
+        let obst = SKSpriteNode(imageNamed: "obstacle")
+        obst.position = CGPoint(x: 300, y: -217)
+        obst.size = CGSize(width: 60, height: 130)
+        obst.xScale = -1
+//        
+//        var walkFrames: [SKTexture] = []
+//        for i in 1...6 {
+//            walkFrames.append(SKTexture(imageNamed: "alien\(i)"))
+//        }
+//        let walkAction = SKAction.animate(with: walkFrames, timePerFrame: 0.1)
+//        enemy.run(SKAction.repeatForever(walkAction))
+        
+        obst.physicsBody = SKPhysicsBody(texture: obst.texture!, size: obst.size)
+        obst.physicsBody?.isDynamic = true
+        obst.physicsBody?.allowsRotation = false
+        obst.physicsBody?.categoryBitMask = obstacleCategory
+        obst.physicsBody?.contactTestBitMask = player.physicsBody!.categoryBitMask | groundNode.physicsBody!.categoryBitMask
+        obst.physicsBody?.collisionBitMask = groundNode.physicsBody!.categoryBitMask
+        obst.zPosition = 12
+        
+        let moveAction = SKAction.moveTo(x: -500, duration: 2.0)
+        let removeAction = SKAction.removeFromParent()
+        obst.run(SKAction.sequence([moveAction, removeAction]))
+        
+        addChild(obst)
+        enemies.append(obst)
+    }
+}
 // MARK: ENEMIES
 extension GameScene {
     func spawnEnemiesPeriodically() {
@@ -351,9 +401,9 @@ extension GameScene{
 extension GameScene{
 
     func createProjectile() {
-        let projectile = SKSpriteNode(imageNamed: "lovemeter8")
-        projectile.position = CGPoint(x: -130, y: -217)
-        projectile.size=CGSize(width: 50, height: 50)
+        let projectile = SKSpriteNode(imageNamed: "proiettile")
+        projectile.position = CGPoint(x: -100, y: -217)
+        projectile.size=CGSize(width: 30, height: 30)
 
         projectile.physicsBody = SKPhysicsBody(texture: projectile.texture!, size: projectile.size)
 
@@ -364,7 +414,7 @@ extension GameScene{
         projectile.physicsBody?.usesPreciseCollisionDetection = true
         addChild(projectile)
         projectile.physicsBody?.affectedByGravity = false
-        let moveAction = SKAction.moveBy(x: 200, y: 0, duration: 2.0)
+        let moveAction = SKAction.moveBy(x: 300, y: 0, duration: 2.0)
         let removeAction = SKAction.removeFromParent()
         projectile.run(SKAction.sequence([moveAction, removeAction]))
     }
@@ -482,6 +532,7 @@ extension GameScene{
         createPlayer()
         createLoveNode()
         spawnEnemiesPeriodically()
+        spawnObstaclesPeriodically()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.canShot = true
             // Qui puoi anche aggiungere altro codice che vuoi eseguire dopo che la variabile è stata impostata su true
@@ -584,7 +635,7 @@ extension GameScene{
             // Ripristina gli elementi di gioco
             spawnEnemiesPeriodically()
             createPlayer()
-
+            spawnObstaclesPeriodically()
             canRestart = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 self.canShot = true
