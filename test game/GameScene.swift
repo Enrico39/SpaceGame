@@ -394,8 +394,8 @@ extension GameScene{
     }
     
     func createMoonGrounds() {
-        moonGround1 = createMoonGroundNode(imageName: "moon1")
-        moonGround2 = createMoonGroundNode(imageName: "moon2")
+        moonGround1 = createMoonGroundNode(imageName: "moon3")
+        moonGround2 = createMoonGroundNode(imageName: "moon4")
          moonGround2.position = CGPoint(x: moonGround1.position.x + moonGround1.size.width, y: moonGround1.position.y)
 
          addChild(moonGround1)
