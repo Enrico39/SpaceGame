@@ -209,12 +209,27 @@ extension GameScene {
 
 // MARK: PLAYER
 extension GameScene{
+ 
+    
     func createLoveNode() {
         let loveNode = SKSpriteNode(imageNamed: "life-export9")
         loveNode.position = CGPoint(x: 30, y: 500)
        // loveNode.size = CGSize(width: 500, height: 300)
         loveNode.zPosition = 1
         addChild(loveNode)
+        
+        var lifeAnimation: [SKTexture] = []
+        for i in stride(from: 9, to: 0, by: -1) {
+           
+            lifeAnimation.append(SKTexture(imageNamed: "life-export\(i)"))
+        }
+        
+        let moveLife = SKAction.animate(with: lifeAnimation, timePerFrame: 3)
+        loveNode.run(moveLife)
+        
+      
+        
+      
     }
 
     func createPlayer() {
