@@ -8,7 +8,8 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    
+    let projectileCategory: UInt32 = 8
+
     var groundNode: SKSpriteNode!
     var player: SKSpriteNode!
     let backgroundSpeed: CGFloat = 100.0
@@ -18,10 +19,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let runningActionKey = "runningAction"
     var runningFrames: [SKTexture] = []
     var shootFrames: [SKTexture] = []
-
+    var gameOverNode: SKSpriteNode!
     let gameOverLabel = SKLabelNode(fontNamed: "Chalkduster")
     let restartLabel = SKLabelNode(fontNamed: "Chalkduster")
     var isGameOver = false
+    var canShot = false
+
     let enemyCategory: UInt32 = 4
     var enemies: [SKSpriteNode] = []
     var introAnimationFrames: [SKTexture] = []
@@ -78,12 +81,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 tapToPlayLabel.removeFromParent()
                 animationNode.removeFromParent()
                 startGame()
+                 
+
             } else {
                 // Esegui l'animazione di "shoot"
-               // shootPlayer()
+           
             }
         }
     }
+    
+    
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            let location = touch.location(in: self)
+            // Qui puoi gestire cosa accade quando il tocco termina
+            if !isPlayerJumping && !isGameOver && canShot{
+                shootPlayer()
+            }
+            // Ad esempio, puoi rilevare se il tocco è terminato su un nodo specifico, ecc.
+        }
+    }
+
     
     func didBegin(_ contact: SKPhysicsContact) {
         let playerNode = player as SKNode
@@ -108,7 +127,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let runningAction = SKAction.animate(with: runningFrames, timePerFrame: 0.1)
                 player.run(SKAction.repeatForever(runningAction), withKey: runningActionKey)
             }
+        }  
+        
+        // Collision between projectile and enemy
+        if (contact.bodyA.categoryBitMask == projectileCategory && contact.bodyB.categoryBitMask == enemyCategory) ||
+           (contact.bodyB.categoryBitMask == projectileCategory && contact.bodyA.categoryBitMask == enemyCategory) {
+            // Remove both nodes
+            contact.bodyA.node?.removeFromParent()
+            contact.bodyB.node?.removeFromParent()
         }
+
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -130,7 +158,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
            // updateBackgroundPosition(scrollingBackground1)
           //  updateBackgroundPosition(scrollingBackground2)
             updateBackgroundPosition(moonGround1)
-                updateBackgroundPosition(moonGround2)
+            updateBackgroundPosition(moonGround2)
         }
     }
     
@@ -245,7 +273,7 @@ extension GameScene{
     //shoot's animation
     func loadShootTextures() {
         for i in 1...6 {
-            shootFrames.append(SKTexture(imageNamed: "player-run-shoott\(i)"))
+            shootFrames.append(SKTexture(imageNamed: "player-shoot\(i)"))
         }
     }
     
@@ -253,7 +281,7 @@ extension GameScene{
         if !isPlayerJumping {
             // Rimuovi l'animazione di corsa e cambia la texture del player
             player.removeAction(forKey: runningActionKey)
-            player.texture = SKTexture(imageNamed: "player-run-shoott1")
+            player.texture = SKTexture(imageNamed: "player-shoot1")
             
             // Crea l'animazione di "shoot"
             let shootAction = SKAction.animate(with: shootFrames, timePerFrame: 0.1)
@@ -264,6 +292,7 @@ extension GameScene{
                 let runningAction = SKAction.animate(with: self?.runningFrames ?? [], timePerFrame: 0.1)
                 self?.player.run(SKAction.repeatForever(runningAction), withKey: self?.runningActionKey ?? "") // Riprendi l'animazione di corsa
             }
+            createProjectile()
         }
     }
 
@@ -290,7 +319,7 @@ extension GameScene{
         // Combina le azioni per creare l'animazione completa
         let deathAnimation = SKAction.sequence([changeToDeath1, jumpUpAction, changeToDeath2, fallDownAction])
         player.removeAction(forKey: runningActionKey)
-        
+        player.zPosition=6
         // Usa la completion handler per garantire che l'animazione di morte sia terminata prima di eseguire altre azioni
         player.run(deathAnimation) { [weak self] in
             self?.showGameOverScreen()  // Mostra la schermata di game over dopo l'animazione
@@ -301,6 +330,32 @@ extension GameScene{
     }
     
 }
+
+
+// MARK: SHOOTING SYSTEM
+extension GameScene{
+
+    func createProjectile() {
+        let projectile = SKSpriteNode(imageNamed: "lovemeter8")
+        projectile.position = CGPoint(x: -130, y: -217)
+        projectile.size=CGSize(width: 50, height: 50)
+
+        projectile.physicsBody = SKPhysicsBody(texture: projectile.texture!, size: projectile.size)
+
+        projectile.physicsBody?.isDynamic = true
+        projectile.physicsBody?.categoryBitMask = projectileCategory
+        projectile.physicsBody?.contactTestBitMask = enemyCategory
+        projectile.physicsBody?.collisionBitMask = 0
+        projectile.physicsBody?.usesPreciseCollisionDetection = true
+        addChild(projectile)
+        projectile.physicsBody?.affectedByGravity = false
+        let moveAction = SKAction.moveBy(x: 200, y: 0, duration: 2.0)
+        let removeAction = SKAction.removeFromParent()
+        projectile.run(SKAction.sequence([moveAction, removeAction]))
+    }
+
+}
+ 
 
 //MARK: GROUND
 extension GameScene{
@@ -412,6 +467,10 @@ extension GameScene{
         createPlayer()
         createLoveNode()
         spawnEnemiesPeriodically()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.canShot = true
+            // Qui puoi anche aggiungere altro codice che vuoi eseguire dopo che la variabile è stata impostata su true
+        }
     }
     //animation intro
     func initializeIntroAnimation() {
@@ -445,17 +504,24 @@ extension GameScene{
 extension GameScene{
     // Funzione di gioco ottimizzata
     func gameOver() {
+        canShot = false
         isGameOver = true
         playDeathAnimation()
         
-        // Rimuovi le etichette di game over
-        gameOverLabel.removeFromParent()
+//        // Rimuovi le etichette di game over
+//        gameOverLabel.removeFromParent()
+//        
+//        // Mostra "Game Over" e "Tap to Restart"
+//        gameOverLabel.text = "Game Over"
+//        gameOverLabel.fontSize = 40
+//        gameOverLabel.position = CGPoint(x: frame.midX, y: frame.midY)
+//        addChild(gameOverLabel)
         
-        // Mostra "Game Over" e "Tap to Restart"
-        gameOverLabel.text = "Game Over"
-        gameOverLabel.fontSize = 40
-        gameOverLabel.position = CGPoint(x: frame.midX, y: frame.midY)
-        addChild(gameOverLabel)
+           gameOverNode = SKSpriteNode(imageNamed: "gameOver")
+                gameOverNode.size = CGSize(width: 500, height: 500)
+                gameOverNode.position = CGPoint(x: 10, y: 30)
+                addChild(gameOverNode)
+        
         
         // Rimuovi tutte le azioni e gli sprite nemici
         self.removeAllActions()
@@ -494,16 +560,22 @@ extension GameScene{
         // Controlla se è possibile riavviare il gioco
         if canRestart {
             isGameOver = false
-            
+
             // Rimuovi etichette e sprite di game over
             restartLabel.removeFromParent()
-            gameOverLabel.removeFromParent()
-            
+//            gameOverLabel.removeFromParent()
+            gameOverNode.removeFromParent()
+
             // Ripristina gli elementi di gioco
             spawnEnemiesPeriodically()
             createPlayer()
-            
+
             canRestart = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.canShot = true
+                // Qui puoi anche aggiungere altro codice che vuoi eseguire dopo che la variabile è stata impostata su true
+            }
+
         }
     }
 }
