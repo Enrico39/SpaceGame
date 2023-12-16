@@ -465,8 +465,8 @@ extension GameScene{
     }
     
     func createMoonGrounds() {
-        moonGround1 = createMoonGroundNode(imageName: "moon3")
-        moonGround2 = createMoonGroundNode(imageName: "moon4")
+        moonGround1 = createMoonGroundNode(imageName: "moon1")
+        moonGround2 = createMoonGroundNode(imageName: "moon2")
         moonGround2.position = CGPoint(x: moonGround1.position.x + moonGround1.size.width, y: moonGround1.position.y)
         
         addChild(moonGround1)
@@ -488,14 +488,14 @@ extension GameScene {
     
     // Carica le texture degli sfondi
     func loadBackgroundTextures() {
-        for i in 1...150 {
-            backgroundFrames.append(SKTexture(imageNamed: "planets\(i)"))
+        for i in 1...54 {
+            backgroundFrames.append(SKTexture(imageNamed: "pianeti1_png\(i)"))
         }
     }
     
     func loadBackgroundTextures2() {
         for i in 1...60 {
-            backgroundFrames2.append(SKTexture(imageNamed: "planets_2_\(i)"))
+            backgroundFrames2.append(SKTexture(imageNamed: "pianeti2_\(i)"))
         }
     }
     
