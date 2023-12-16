@@ -18,7 +18,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     let projectileCategory: UInt32 = 8
-
+    
     var groundNode: SKSpriteNode!
     var player: SKSpriteNode!
     let backgroundSpeed: CGFloat = 100.0
@@ -29,12 +29,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var runningFrames: [SKTexture] = []
     var shootFrames: [SKTexture] = []
     var gameOverNode: SKSpriteNode!
-    let gameOverLabel = SKLabelNode(fontNamed: "Chalkduster")
+    // let gameOverLabel = SKLabelNode(fontNamed: "Chalkduster")
     let restartLabel = SKLabelNode(fontNamed: "Chalkduster")
     
     var isGameOver = false
     var canShot = false
-
     
     
     
@@ -46,7 +45,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var backgroundFrames: [SKTexture] = []
     var backgroundFrames2: [SKTexture] = []
     let obstacleCategory: UInt32 = 16
-
+    
     var scrollingBackground: SKSpriteNode!
     var scrollingBackground1: SKSpriteNode!
     var scrollingBackground2: SKSpriteNode!
@@ -57,7 +56,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var moonGround2: SKSpriteNode!
     var moonGroundSpeed: CGFloat = 5.0
     var obstacle: SKSpriteNode!
-
+    
     override func didMove(to view: SKView) {
          // Imposta il delegate per la gestione dei contatti fisici
          self.physicsWorld.contactDelegate = self
@@ -90,6 +89,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Gestione dei tocchi
         if isGameOver {
             restartGame()
+            
         } else {
             if tapToPlayLabel.parent != nil {
                 // Rimuovi le etichette di inizio gioco
@@ -97,11 +97,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 animationNode.removeFromParent()
                  highScoreLabel.removeFromParent()
                 startGame()
-                 
-
+                
+                
             } else {
                 // Esegui l'animazione di "shoot"
-           
+                
             }
         }
     }
@@ -118,7 +118,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // Ad esempio, puoi rilevare se il tocco è terminato su un nodo specifico, ecc.
         }
     }
-
+    
     
     func didBegin(_ contact: SKPhysicsContact) {
         _ = player as SKNode
@@ -148,16 +148,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let runningAction = SKAction.animate(with: runningFrames, timePerFrame: 0.1)
                 player.run(SKAction.repeatForever(runningAction), withKey: runningActionKey)
             }
-        }  
+        }
         
         // Collision between projectile and enemy
         if (contact.bodyA.categoryBitMask == projectileCategory && contact.bodyB.categoryBitMask == enemyCategory) ||
-           (contact.bodyB.categoryBitMask == projectileCategory && contact.bodyA.categoryBitMask == enemyCategory) {
+            (contact.bodyB.categoryBitMask == projectileCategory && contact.bodyA.categoryBitMask == enemyCategory) {
             // Remove both nodes
             contact.bodyA.node?.removeFromParent()
             contact.bodyB.node?.removeFromParent()
         }
-
+        
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -176,8 +176,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
             updateBackgrounds()
-           // updateBackgroundPosition(scrollingBackground1)
-          //  updateBackgroundPosition(scrollingBackground2)
+            // updateBackgroundPosition(scrollingBackground1)
+            //  updateBackgroundPosition(scrollingBackground2)
             updateBackgroundPosition(moonGround1)
             updateBackgroundPosition(moonGround2)
             showScore()
@@ -188,10 +188,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
 
         }
+        
+    
+       
     }
     
     
-  
+    
 }
 
 // MARK: OBSTACLES
@@ -210,13 +213,13 @@ extension GameScene {
         obst.position = CGPoint(x: 300, y: -217)
         obst.size = CGSize(width: 60, height: 130)
         obst.xScale = -1
-//        
-//        var walkFrames: [SKTexture] = []
-//        for i in 1...6 {
-//            walkFrames.append(SKTexture(imageNamed: "alien\(i)"))
-//        }
-//        let walkAction = SKAction.animate(with: walkFrames, timePerFrame: 0.1)
-//        enemy.run(SKAction.repeatForever(walkAction))
+        //
+        //        var walkFrames: [SKTexture] = []
+        //        for i in 1...6 {
+        //            walkFrames.append(SKTexture(imageNamed: "alien\(i)"))
+        //        }
+        //        let walkAction = SKAction.animate(with: walkFrames, timePerFrame: 0.1)
+        //        enemy.run(SKAction.repeatForever(walkAction))
         
         obst.physicsBody = SKPhysicsBody(texture: obst.texture!, size: obst.size)
         obst.physicsBody?.isDynamic = true
@@ -248,7 +251,7 @@ extension GameScene {
     func createEnemy() {
         let enemy = SKSpriteNode(imageNamed: "alien1")
         enemy.position = CGPoint(x: 300, y: -217)
-         enemy.size = CGSize(width: 60, height: 60)
+        enemy.size = CGSize(width: 60, height: 60)
         enemy.xScale = -1
         
         var walkFrames: [SKTexture] = []
@@ -277,29 +280,29 @@ extension GameScene {
 
 // MARK: PLAYER
 extension GameScene{
- 
+    
     
     func createLoveNode() {
         let loveNode = SKSpriteNode(imageNamed: "life-export9")
-        loveNode.position = CGPoint(x: 30, y: 500)
-       // loveNode.size = CGSize(width: 500, height: 300)
+        loveNode.position = CGPoint(x: -100, y: 500)
+        loveNode.size = CGSize(width: 400, height: 300)
         loveNode.zPosition = 1
         addChild(loveNode)
         
         var lifeAnimation: [SKTexture] = []
         for i in stride(from: 9, to: 0, by: -1) {
-           
+            
             lifeAnimation.append(SKTexture(imageNamed: "life-export\(i)"))
         }
         
         let moveLife = SKAction.animate(with: lifeAnimation, timePerFrame: 3)
         loveNode.run(moveLife)
         
-      
         
-      
+        
+        
     }
-
+    
     func createPlayer() {
         // Load the first frame to initialize the player
         let initialFrame = SKTexture(imageNamed: "player")
@@ -378,10 +381,10 @@ extension GameScene{
             createProjectile()
         }
     }
-
-
+    
+    
     func playDeathAnimation() {
-
+        
         player.removeAllActions() // Rimuove tutte le azioni in corso, inclusa l'animazione di corsa
         player.physicsBody?.collisionBitMask &= ~groundNode.physicsBody!.categoryBitMask
         player.zPosition = 3
@@ -417,14 +420,14 @@ extension GameScene{
 
 // MARK: SHOOTING SYSTEM
 extension GameScene{
-
+    
     func createProjectile() {
         let projectile = SKSpriteNode(imageNamed: "proiettile")
-        projectile.position = CGPoint(x: -100, y: -217)
-        projectile.size=CGSize(width: 30, height: 30)
-
+        projectile.position = CGPoint(x: -100, y: -210)
+        projectile.size=CGSize(width: 50, height: 50)
+        
         projectile.physicsBody = SKPhysicsBody(texture: projectile.texture!, size: projectile.size)
-
+        
         projectile.physicsBody?.isDynamic = true
         projectile.physicsBody?.categoryBitMask = projectileCategory
         projectile.physicsBody?.contactTestBitMask = enemyCategory
@@ -436,22 +439,22 @@ extension GameScene{
         let removeAction = SKAction.removeFromParent()
         projectile.run(SKAction.sequence([moveAction, removeAction]))
     }
-
+    
 }
- 
+
 
 //MARK: GROUND
 extension GameScene{
     // Ottimizzazione della creazione del terreno di gioco
-      func createGround() {
-          groundNode = SKSpriteNode(imageNamed: "ground1")
-          groundNode.position = CGPoint(x: frame.midX, y: -517)
-          groundNode.size = CGSize(width: 1300, height: 500)
-          groundNode.physicsBody = SKPhysicsBody(rectangleOf: groundNode.size)
-          groundNode.physicsBody?.isDynamic = false
-          groundNode.physicsBody?.categoryBitMask = 1
-          addChild(groundNode)
-      }
+    func createGround() {
+        groundNode = SKSpriteNode(imageNamed: "ground1")
+        groundNode.position = CGPoint(x: frame.midX, y: -517)
+        groundNode.size = CGSize(width: 1300, height: 500)
+        groundNode.physicsBody = SKPhysicsBody(rectangleOf: groundNode.size)
+        groundNode.physicsBody?.isDynamic = false
+        groundNode.physicsBody?.categoryBitMask = 1
+        addChild(groundNode)
+    }
     
     func createMoonGroundNode(imageName:String) -> SKSpriteNode {
         let moonGroundNode = SKSpriteNode(imageNamed: imageName)  // Usa "moon1" o "moon2" a seconda dell'asset desiderato
@@ -464,15 +467,15 @@ extension GameScene{
     func createMoonGrounds() {
         moonGround1 = createMoonGroundNode(imageName: "moon3")
         moonGround2 = createMoonGroundNode(imageName: "moon4")
-         moonGround2.position = CGPoint(x: moonGround1.position.x + moonGround1.size.width, y: moonGround1.position.y)
-
-         addChild(moonGround1)
-         addChild(moonGround2)
-     }
-
+        moonGround2.position = CGPoint(x: moonGround1.position.x + moonGround1.size.width, y: moonGround1.position.y)
+        
+        addChild(moonGround1)
+        addChild(moonGround2)
+    }
+    
 }
 
- // MARK: BACKGROUND
+// MARK: BACKGROUND
 extension GameScene {
     
     func updateBackgroundPosition(_ background: SKSpriteNode) {
@@ -581,6 +584,7 @@ extension GameScene{
         tapToPlayLabel.text = "Tap to Play"
         tapToPlayLabel.fontSize = 40
         tapToPlayLabel.position = CGPoint(x: frame.midX, y: frame.midY)
+        
         addChild(tapToPlayLabel)
     }
 }
@@ -650,12 +654,12 @@ extension GameScene{
         // Controlla se è possibile riavviare il gioco
         if canRestart {
             isGameOver = false
-
+            
             // Rimuovi etichette e sprite di game over
             restartLabel.removeFromParent()
-//            gameOverLabel.removeFromParent()
+            //            gameOverLabel.removeFromParent()
             gameOverNode.removeFromParent()
-
+            
             // Ripristina gli elementi di gioco
             spawnEnemiesPeriodically()
             createPlayer()
