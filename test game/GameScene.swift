@@ -6,8 +6,17 @@
 //
 import SpriteKit
 import GameplayKit
-
+import SwiftUI
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    
+    @AppStorage("HighScore") var highScore: Int = 0
+    let highScoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+    var score: Int = 0
+    let scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+    let gameOverScoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+    var startScore:Bool = false
+    
+    
     let projectileCategory: UInt32 = 8
 
     var groundNode: SKSpriteNode!
@@ -22,6 +31,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var gameOverNode: SKSpriteNode!
     let gameOverLabel = SKLabelNode(fontNamed: "Chalkduster")
     let restartLabel = SKLabelNode(fontNamed: "Chalkduster")
+    
     var isGameOver = false
     var canShot = false
 
@@ -55,7 +65,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
          // Inizializza e avvia l'animazione introduttiva
          initializeIntroAnimation()
          playIntroAnimation()
-         
+         showHighScore()
          // Configura la gesture di swipe
          setupSwipeGesture(view: view)
          
@@ -85,6 +95,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 // Rimuovi le etichette di inizio gioco
                 tapToPlayLabel.removeFromParent()
                 animationNode.removeFromParent()
+                 highScoreLabel.removeFromParent()
                 startGame()
                  
 
@@ -99,7 +110,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
-            let location = touch.location(in: self)
+            _ = touch.location(in: self)
             // Qui puoi gestire cosa accade quando il tocco termina
             if !isPlayerJumping && !isGameOver && canShot{
                 shootPlayer()
@@ -110,7 +121,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     
     func didBegin(_ contact: SKPhysicsContact) {
-        let playerNode = player as SKNode
+        _ = player as SKNode
         let groundNode = groundNode as SKNode
         if !isGameOver{
             if (contact.bodyA.categoryBitMask == player.physicsBody?.categoryBitMask && contact.bodyB.categoryBitMask == groundNode.physicsBody?.categoryBitMask) ||
@@ -169,6 +180,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
           //  updateBackgroundPosition(scrollingBackground2)
             updateBackgroundPosition(moonGround1)
             updateBackgroundPosition(moonGround2)
+            showScore()
+            if startScore==true{
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.score+=1
+                }
+            }
+
         }
     }
     
@@ -437,8 +455,8 @@ extension GameScene{
     
     func createMoonGroundNode(imageName:String) -> SKSpriteNode {
         let moonGroundNode = SKSpriteNode(imageNamed: imageName)  // Usa "moon1" o "moon2" a seconda dell'asset desiderato
-        moonGroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y+65)
-        moonGroundNode.size = CGSize(width: 1900, height:400)  // Modifica la dimensione in base alle tue esigenze
+        moonGroundNode.position = CGPoint(x: frame.midX, y: groundNode.position.y+55)
+        moonGroundNode.size = CGSize(width: 1900, height:410)  // Modifica la dimensione in base alle tue esigenze
         moonGroundNode.zPosition = 5
         return moonGroundNode
     }
@@ -473,8 +491,8 @@ extension GameScene {
     }
     
     func loadBackgroundTextures2() {
-        for i in 2...150 {
-            backgroundFrames2.append(SKTexture(imageNamed: "bg\(i)"))
+        for i in 1...60 {
+            backgroundFrames2.append(SKTexture(imageNamed: "planets_2_\(i)"))
         }
     }
     
@@ -494,7 +512,7 @@ extension GameScene {
         backgroundNode.size = CGSize(width: 3000, height: 1000)
         backgroundNode.zPosition = -1
         
-        let backgroundAnimation = SKAction.animate(with: texture, timePerFrame: 0.03)
+        let backgroundAnimation = SKAction.animate(with: texture, timePerFrame: 0.12)
         let endlessAnimation = SKAction.repeatForever(backgroundAnimation)
         backgroundNode.run(endlessAnimation)
         
@@ -533,6 +551,7 @@ extension GameScene{
         createLoveNode()
         spawnEnemiesPeriodically()
         spawnObstaclesPeriodically()
+        startScore=true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.canShot = true
             // Qui puoi anche aggiungere altro codice che vuoi eseguire dopo che la variabile è stata impostata su true
@@ -573,7 +592,7 @@ extension GameScene{
         canShot = false
         isGameOver = true
         playDeathAnimation()
-        
+        updateHighScore()
 //        // Rimuovi le etichette di game over
 //        gameOverLabel.removeFromParent()
 //        
@@ -582,6 +601,11 @@ extension GameScene{
 //        gameOverLabel.fontSize = 40
 //        gameOverLabel.position = CGPoint(x: frame.midX, y: frame.midY)
 //        addChild(gameOverLabel)
+        
+        
+        if gameOverNode?.parent != nil {
+            gameOverNode.removeFromParent()
+        }
         
            gameOverNode = SKSpriteNode(imageNamed: "gameOver")
                 gameOverNode.size = CGSize(width: 500, height: 500)
@@ -641,7 +665,62 @@ extension GameScene{
                 self.canShot = true
                 // Qui puoi anche aggiungere altro codice che vuoi eseguire dopo che la variabile è stata impostata su true
             }
+            gameOverScoreLabel.removeFromParent()
+            score=0
 
         }
     }
+}
+
+//MARK: SCORE SYSTEM
+
+extension GameScene{
+    
+    func showHighScore(){
+        highScoreLabel.text = "Highscore: \(highScore)"
+        highScoreLabel.fontSize = 50
+        highScoreLabel.position = CGPoint(x: frame.midX, y: frame.midY - 250)
+        highScoreLabel.fontColor = UIColor.black
+        highScoreLabel.zPosition=25
+        addChild(highScoreLabel)
+    }
+    
+    func showScore(){
+        scoreLabel.text = "Score: \(score)"
+        scoreLabel.fontSize = 30
+        scoreLabel.position = CGPoint(x: frame.midX+200, y: frame.midY + 400)
+        scoreLabel.fontColor = UIColor.black
+        scoreLabel.zPosition=19
+         
+            
+            if scoreLabel.parent != nil {
+//                 print("tapToPlayLabel è stato aggiunto alla scena.")
+            } else {
+                addChild(scoreLabel)
+
+            }
+    }
+    
+    func updateHighScore(){
+        if score > highScore{
+            highScore=score
+//            gameOverScoreLabel.text = "New Highscore: \(highScore)"
+//            print("dd")
+
+        }
+        else{
+//            gameOverScoreLabel.text = "Your Score: \(score)"
+        }
+                
+        
+        gameOverScoreLabel.text = "Highscore: \(highScore)\n Your score \(score)"
+         gameOverScoreLabel.fontSize = 30
+        gameOverScoreLabel.position = CGPoint(x: frame.midX, y: frame.midY)
+        gameOverScoreLabel.fontColor = UIColor.black
+        gameOverScoreLabel.zPosition=25
+        gameOverScoreLabel.removeFromParent()
+        addChild(gameOverScoreLabel)
+    }
+    
+    
 }
