@@ -489,7 +489,7 @@ extension GameScene {
     // Carica le texture degli sfondi
     func loadBackgroundTextures() {
         for i in 1...54 {
-            backgroundFrames.append(SKTexture(imageNamed: "pianeti1_png\(i)"))
+            backgroundFrames.append(SKTexture(imageNamed: "pianetini\(i)"))
         }
     }
     
