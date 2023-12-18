@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C912C7A2B3053A700DE47D3 /* backgroundMusic.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2C912C792B3053A700DE47D3 /* backgroundMusic.mp3 */; };
 		2CB84A1E2B287C5C00CFFEE4 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB84A1D2B287C5C00CFFEE4 /* SoundManager.swift */; };
 		AA4BED0C2B2271A500D64BC1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BED0B2B2271A500D64BC1 /* AppDelegate.swift */; };
 		AA4BED102B2271A500D64BC1 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = AA4BED0F2B2271A500D64BC1 /* Actions.sks */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2C912C792B3053A700DE47D3 /* backgroundMusic.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = backgroundMusic.mp3; sourceTree = "<group>"; };
 		2CB84A1D2B287C5C00CFFEE4 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		AA4BED082B2271A500D64BC1 /* test game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "test game.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA4BED0B2B2271A500D64BC1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -70,6 +72,7 @@
 				AA4BED182B2271A600D64BC1 /* Assets.xcassets */,
 				AA4BED1A2B2271A600D64BC1 /* LaunchScreen.storyboard */,
 				2CB84A1D2B287C5C00CFFEE4 /* SoundManager.swift */,
+				2C912C792B3053A700DE47D3 /* backgroundMusic.mp3 */,
 			);
 			path = "test game";
 			sourceTree = "<group>";
@@ -134,6 +137,7 @@
 			files = (
 				AA4BED172B2271A500D64BC1 /* Main.storyboard in Resources */,
 				AA4BED262B22731C00D64BC1 /* GameScene.sks in Resources */,
+				2C912C7A2B3053A700DE47D3 /* backgroundMusic.mp3 in Resources */,
 				AA4BED192B2271A600D64BC1 /* Assets.xcassets in Resources */,
 				AA4BED1C2B2271A600D64BC1 /* LaunchScreen.storyboard in Resources */,
 				AA4BED102B2271A500D64BC1 /* Actions.sks in Resources */,

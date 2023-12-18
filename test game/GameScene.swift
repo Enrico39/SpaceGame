@@ -35,8 +35,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var isGameOver = false
     var canShot = false
     
-    
-    
     let enemyCategory: UInt32 = 4
     var enemies: [SKSpriteNode] = []
     var introAnimationFrames: [SKTexture] = []
@@ -299,6 +297,9 @@ extension GameScene{
         loveNode.run(moveLife)
         
         
+//        if loveNode.texture == SKTexture(imageNamed: "life-export1") {
+//              self.gameOver()
+//          }
         
         
     }
