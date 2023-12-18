@@ -16,7 +16,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let gameOverScoreLabel = SKLabelNode(fontNamed: "Chalkduster")
     var startScore:Bool = false
     
-    
+    var logoNode: SKSpriteNode!
+
     let projectileCategory: UInt32 = 8
     
     var groundNode: SKSpriteNode!
@@ -58,7 +59,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
          // Imposta il delegate per la gestione dei contatti fisici
          self.physicsWorld.contactDelegate = self
-         
+        createLogo()
+        showTapToPlay()
          // Inizializza e avvia l'animazione introduttiva
          initializeIntroAnimation()
          playIntroAnimation()
@@ -94,8 +96,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 tapToPlayLabel.removeFromParent()
                 animationNode.removeFromParent()
                  highScoreLabel.removeFromParent()
+                logoNode.removeFromParent() // Rimuovi l'immagine del logo
+                tapToPlayLabel.removeFromParent()
                 startGame()
-                
+
                 
             } else {
                 // Esegui l'animazione di "shoot"
@@ -193,6 +197,69 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     
+}
+
+
+
+
+//MARK: INTROSCENE
+extension GameScene{
+    
+    func createLogo() {
+        let logoTexture = SKTexture(imageNamed: "logo")
+        logoNode = SKSpriteNode(texture: logoTexture)
+        logoNode.size=CGSize(width: 350, height: 300)
+        logoNode.position = CGPoint(x: frame.midX, y: frame.midY+300)
+        logoNode.zPosition = 25 // Assicurati che sia posizionato sopra l'animazione di intro
+        addChild(logoNode)
+    }
+
+    // Funzione di gioco ottimizzata
+    func startGame() {
+        // Crea il giocatore e altri elementi di gioco
+        createPlayer()
+        createLoveNode()
+        spawnEnemiesPeriodically()
+        spawnObstaclesPeriodically()
+        startScore=true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.canShot = true
+            // Qui puoi anche aggiungere altro codice che vuoi eseguire dopo che la variabile è stata impostata su true
+        }
+    }
+    //animation intro
+    func initializeIntroAnimation() {
+        for i in 1...61 {
+            introAnimationFrames.append(SKTexture(imageNamed: "intro\(i)"))
+        }
+    }
+    
+    func playIntroAnimation() {
+        let animation = SKAction.animate(with: introAnimationFrames, timePerFrame: 0.1)
+        animationNode = SKSpriteNode(texture: introAnimationFrames.first)
+        animationNode.position = CGPoint(x: frame.midX, y: frame.midY)
+        animationNode.size=CGSize(width: frame.width, height: frame.height+70)
+        animationNode.zPosition = 20
+        addChild(animationNode)
+        
+        animationNode.run(animation) { [weak self] in
+            self?.showTapToPlay()
+        }
+    }
+    
+    func showTapToPlay() {
+        tapToPlayLabel.text = "Tap to Play"
+        tapToPlayLabel.fontSize = 40
+         tapToPlayLabel.zPosition = 25
+        tapToPlayLabel.position = CGPoint(x: frame.midX, y: frame.midY - 350)
+        tapToPlayLabel.fontColor = UIColor.black
+        addChild(tapToPlayLabel)
+        let fadeOut = SKAction.fadeOut(withDuration: 0.8)
+        let fadeIn = SKAction.fadeIn(withDuration: 0.8)
+        let blinkSequence = SKAction.sequence([fadeOut, fadeIn])
+        let repeatBlink = SKAction.repeatForever(blinkSequence)
+        tapToPlayLabel.run(repeatBlink)
+    }
 }
 
 // MARK: OBSTACLES
@@ -546,49 +613,6 @@ extension GameScene {
 }
 
 
-//MARK: INTROSCENE
-extension GameScene{
-    // Funzione di gioco ottimizzata
-    func startGame() {
-        // Crea il giocatore e altri elementi di gioco
-        createPlayer()
-        createLoveNode()
-        spawnEnemiesPeriodically()
-        spawnObstaclesPeriodically()
-        startScore=true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.canShot = true
-            // Qui puoi anche aggiungere altro codice che vuoi eseguire dopo che la variabile è stata impostata su true
-        }
-    }
-    //animation intro
-    func initializeIntroAnimation() {
-        for i in 1...61 {
-            introAnimationFrames.append(SKTexture(imageNamed: "intro\(i)"))
-        }
-    }
-    
-    func playIntroAnimation() {
-        let animation = SKAction.animate(with: introAnimationFrames, timePerFrame: 0.1)
-        animationNode = SKSpriteNode(texture: introAnimationFrames.first)
-        animationNode.position = CGPoint(x: frame.midX, y: frame.midY)
-        animationNode.size=CGSize(width: frame.width, height: frame.height)
-        animationNode.zPosition = 20
-        addChild(animationNode)
-        
-        animationNode.run(animation) { [weak self] in
-            self?.showTapToPlay()
-        }
-    }
-    
-    func showTapToPlay() {
-        tapToPlayLabel.text = "Tap to Play"
-        tapToPlayLabel.fontSize = 40
-        tapToPlayLabel.position = CGPoint(x: frame.midX, y: frame.midY)
-        
-        addChild(tapToPlayLabel)
-    }
-}
 
 //MARK: GAMEOVER
 extension GameScene{
