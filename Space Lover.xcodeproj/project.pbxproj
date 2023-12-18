@@ -22,7 +22,7 @@
 /* Begin PBXFileReference section */
 		2C912C792B3053A700DE47D3 /* backgroundMusic.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = backgroundMusic.mp3; sourceTree = "<group>"; };
 		2CB84A1D2B287C5C00CFFEE4 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
-		AA4BED082B2271A500D64BC1 /* test game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "test game.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA4BED082B2271A500D64BC1 /* Space Lover.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space Lover.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA4BED0B2B2271A500D64BC1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AA4BED0F2B2271A500D64BC1 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
 		AA4BED112B2271A500D64BC1 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -55,7 +55,7 @@
 		AA4BED092B2271A500D64BC1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AA4BED082B2271A500D64BC1 /* test game.app */,
+				AA4BED082B2271A500D64BC1 /* Space Lover.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,9 +80,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AA4BED072B2271A500D64BC1 /* test game */ = {
+		AA4BED072B2271A500D64BC1 /* Space Lover */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AA4BED1F2B2271A600D64BC1 /* Build configuration list for PBXNativeTarget "test game" */;
+			buildConfigurationList = AA4BED1F2B2271A600D64BC1 /* Build configuration list for PBXNativeTarget "Space Lover" */;
 			buildPhases = (
 				AA4BED042B2271A500D64BC1 /* Sources */,
 				AA4BED052B2271A500D64BC1 /* Frameworks */,
@@ -92,9 +92,9 @@
 			);
 			dependencies = (
 			);
-			name = "test game";
+			name = "Space Lover";
 			productName = "test game";
-			productReference = AA4BED082B2271A500D64BC1 /* test game.app */;
+			productReference = AA4BED082B2271A500D64BC1 /* Space Lover.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -112,7 +112,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AA4BED032B2271A400D64BC1 /* Build configuration list for PBXProject "test game" */;
+			buildConfigurationList = AA4BED032B2271A400D64BC1 /* Build configuration list for PBXProject "Space Lover" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -125,7 +125,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AA4BED072B2271A500D64BC1 /* test game */,
+				AA4BED072B2271A500D64BC1 /* Space Lover */,
 			);
 		};
 /* End PBXProject section */
@@ -358,7 +358,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AA4BED032B2271A400D64BC1 /* Build configuration list for PBXProject "test game" */ = {
+		AA4BED032B2271A400D64BC1 /* Build configuration list for PBXProject "Space Lover" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA4BED1D2B2271A600D64BC1 /* Debug */,
@@ -367,7 +367,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AA4BED1F2B2271A600D64BC1 /* Build configuration list for PBXNativeTarget "test game" */ = {
+		AA4BED1F2B2271A600D64BC1 /* Build configuration list for PBXNativeTarget "Space Lover" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA4BED202B2271A600D64BC1 /* Debug */,
