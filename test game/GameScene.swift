@@ -568,7 +568,7 @@ extension GameScene{
     }
     
     func playIntroAnimation() {
-        let animation = SKAction.animate(with: introAnimationFrames, timePerFrame: 0.007)
+        let animation = SKAction.animate(with: introAnimationFrames, timePerFrame: 0.1)
         animationNode = SKSpriteNode(texture: introAnimationFrames.first)
         animationNode.position = CGPoint(x: frame.midX, y: frame.midY)
         animationNode.size=CGSize(width: frame.width, height: frame.height)
@@ -692,7 +692,7 @@ extension GameScene{
     func showScore(){
         scoreLabel.text = "Score: \(score)"
         scoreLabel.fontSize = 30
-        scoreLabel.position = CGPoint(x: frame.midX+200, y: frame.midY + 400)
+        scoreLabel.position = CGPoint(x: frame.midX+200, y: frame.midY + 490)
         scoreLabel.fontColor = UIColor.black
         scoreLabel.zPosition=19
          
