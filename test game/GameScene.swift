@@ -97,8 +97,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 animationNode.removeFromParent()
                  highScoreLabel.removeFromParent()
                 logoNode.removeFromParent() // Rimuovi l'immagine del logo
-                tapToPlayLabel.removeFromParent()
-                startGame()
+                 startGame()
 
                 
             } else {
@@ -242,9 +241,7 @@ extension GameScene{
         animationNode.zPosition = 20
         addChild(animationNode)
         
-        animationNode.run(animation) { [weak self] in
-            self?.showTapToPlay()
-        }
+        animationNode.run(animation)
     }
     
     func showTapToPlay() {
@@ -373,7 +370,7 @@ extension GameScene{
     
     func createPlayer() {
         // Load the first frame to initialize the player
-        let initialFrame = SKTexture(imageNamed: "player")
+        let initialFrame = SKTexture(imageNamed: "player-run1")
         player = SKSpriteNode(texture: initialFrame)
         player.position = CGPoint(x: -170, y: -217)
         player.size = CGSize(width: 100, height: 110)
@@ -412,7 +409,7 @@ extension GameScene{
     func jumpPlayer() {
         if !isPlayerJumping {
             isPlayerJumping = true
-            player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 350))
+            player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 230))
             player.removeAction(forKey: runningActionKey)  // Stop running animation
             player.texture = SKTexture(imageNamed: "player-jump1")
         }
